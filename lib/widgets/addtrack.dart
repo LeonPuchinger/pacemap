@@ -11,6 +11,12 @@ class _AddTrackState extends State<AddTrack> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Add Gps-Track"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: SafeArea(
         child: Container(),
