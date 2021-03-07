@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pacemap/widgets/addtrack.dart';
 import 'package:pacemap/widgets/tracklist.dart';
 
 void main() => runApp(PaceMapApp());
@@ -12,6 +13,7 @@ class PaceMapApp extends StatelessWidget {
       initialRoute: "list",
       routes: {
         "list": (_) => Tracklist(),
+        "list/add": (_) => AddTrack(),
       },
     );
   }

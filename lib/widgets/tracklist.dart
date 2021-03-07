@@ -12,6 +12,12 @@ class _TracklistState extends State<Tracklist> {
       appBar: AppBar(
         title: Text("PaceMap"),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text("Add Track"),
+        icon: Icon(Icons.add),
+        onPressed: () => Navigator.pushNamed(context, "list/add"),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
