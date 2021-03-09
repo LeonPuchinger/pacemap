@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pacemap/data/services/gps.dart';
+import 'package:pacemap/data/state/add_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AddTrack extends StatefulWidget {
@@ -7,10 +9,12 @@ class AddTrack extends StatefulWidget {
 }
 
 class _AddTrackState extends State<AddTrack> {
+  final _bloc = AddBloc();
   final _showSearch = BehaviorSubject<bool>.seeded(false);
 
   @override
   void dispose() {
+    _bloc.dispose();
     _showSearch.close();
     super.dispose();
   }
@@ -30,6 +34,7 @@ class _AddTrackState extends State<AddTrack> {
                   hintText: "Search Gps-Tracks",
                   border: InputBorder.none,
                 ),
+                onChanged: _bloc.inputSearch,
               );
             } else {
               return Text("Add Gps-Track");
@@ -51,7 +56,18 @@ class _AddTrackState extends State<AddTrack> {
         ],
       ),
       body: SafeArea(
-        child: Container(),
+        child: StreamBuilder<List<GpsTrack>>(
+          stream: _bloc.tracks,
+          initialData: [],
+          builder: (_, searchSnapshot) {
+            return ListView.builder(
+              itemBuilder: (_, index) {
+                return Text(searchSnapshot.data![index].name);
+              },
+              itemCount: searchSnapshot.data?.length,
+            );
+          },
+        ),
       ),
     );
   }
