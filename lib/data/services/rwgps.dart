@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:latlng/latlng.dart';
 import 'package:pacemap/data/services/gps.dart';
 
 class RWGPSClient {
@@ -41,6 +42,21 @@ class RWGPSClient {
     );
     if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
       return _parseTracks(response.data);
+    }
+    return [];
+  }
+
+  Future getGpx(int id, TrackType type) async {
+    final response = await _client.get(
+        "$baseUrl/${type == TrackType.trip ? "trips" : "routes"}/$id.json");
+    final list = <LatLng>[];
+    if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+      for (final Map m in response.data["track_points"] ?? []) {
+        if (m.containsKey("x") && m.containsKey("y")) {
+          list.add(LatLng(m["y"]!.toDouble(), m["x"]!.toDouble()));
+        }
+      }
+      return list;
     }
     return [];
   }
