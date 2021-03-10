@@ -44,6 +44,26 @@ class DatabaseHandler {
       columnTrackUrl: track.thumbnailUrl,
       columnTrackStartTime: track.startTime?.toIso8601String(),
     };
-    await db.insert(tableTracks, trackMap, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      tableTracks,
+      trackMap,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<GpsTrack>> getTracks() async {
+    final tracks = await db.query(tableTracks);
+    return tracks.map((r) {
+      return GpsTrack(
+        r[columnTrackName] as String,
+        r[columnTrackUrl] as String?,
+        r[columnTrackStartTime] == null
+            ? null
+            : DateTime.tryParse(r[columnTrackStartTime] as String),
+        r[columnTrackId] as int,
+        r[columnTrackDistance] as int,
+        TrackType.route,
+      );
+    }).toList();
   }
 }
