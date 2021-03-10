@@ -66,4 +66,8 @@ class DatabaseHandler {
       );
     }).toList();
   }
+
+  dispose() async {
+    await db.close();
+  }
 }
