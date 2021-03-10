@@ -26,7 +26,7 @@ class RWGPSClient {
     return list;
   }
 
-  Future<List<GpsTrack>> searchRoutes(String keyword) async {
+  Future<List<GpsTrack>> searchTracks(String keyword) async {
     final options = {
       "search": {
         "keywords": "$keyword",

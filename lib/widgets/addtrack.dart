@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:pacemap/data/services/gps.dart';
 import 'package:pacemap/data/state/add_bloc.dart';
+import 'package:pacemap/util/dual_streambuilder.dart';
 import 'package:pacemap/widgets/trackentry.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -57,23 +60,56 @@ class _AddTrackState extends State<AddTrack> {
         ],
       ),
       body: SafeArea(
-        child: StreamBuilder<List<GpsTrack>>(
-          stream: _bloc.tracks,
-          initialData: [],
-          builder: (_, searchSnapshot) {
-            return ListView.builder(
-              itemBuilder: (_, index) {
-                final track = searchSnapshot.data![index];
-                return TrackEntry(
-                  name: track.name,
-                  distance: "${track.distance}",
-                  url: track.thumbnailUrl,
-                  onPressed: () {},
+        child: Stack(
+          children: [
+            DualStreamBuilder<List<GpsTrack>, bool>(
+              streamA: _bloc.tracks,
+              streamB: _bloc.loading,
+              initialDataA: [],
+              initialDataB: false,
+              builder: (_, searchSnapshot, loadingSnapshot) {
+                if (loadingSnapshot.data ?? false) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                return ListView.builder(
+                  itemBuilder: (_, index) {
+                    final track = searchSnapshot.data![index];
+                    return TrackEntry(
+                      name: track.name,
+                      distance: "${track.distance}",
+                      url: track.thumbnailUrl,
+                      onPressed: () => _bloc.selectTrack(index),
+                    );
+                  },
+                  itemCount: searchSnapshot.data?.length,
                 );
               },
-              itemCount: searchSnapshot.data?.length,
-            );
-          },
+            ),
+            StreamBuilder<bool>(
+              stream: _bloc.download,
+              initialData: false,
+              builder: (_, downloadSnapshot) {
+                if (downloadSnapshot.data ?? false) {
+                  return BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Column(
+                      children: [
+                        LinearProgressIndicator(),
+                        Expanded(
+                          child: Center(
+                            child: Text("Downloading GPS-Track..."),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return Container();
+              },
+            ),
+          ],
         ),
       ),
     );
