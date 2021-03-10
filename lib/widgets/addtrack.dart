@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pacemap/data/services/gps.dart';
 import 'package:pacemap/data/state/add_bloc.dart';
+import 'package:pacemap/widgets/trackentry.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AddTrack extends StatefulWidget {
@@ -62,7 +63,13 @@ class _AddTrackState extends State<AddTrack> {
           builder: (_, searchSnapshot) {
             return ListView.builder(
               itemBuilder: (_, index) {
-                return Text(searchSnapshot.data![index].name);
+                final track = searchSnapshot.data![index];
+                return TrackEntry(
+                  name: track.name,
+                  distance: "${track.distance}",
+                  url: track.thumbnailUrl,
+                  onPressed: () {},
+                );
               },
               itemCount: searchSnapshot.data?.length,
             );
