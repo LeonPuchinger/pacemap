@@ -21,7 +21,7 @@ class RWGPSClient {
       final url = (details["highlighted_photo_id"] ?? 0) != 0
           ? "$baseUrl/photos/${details["highlighted_photo_id"]}/sq_thumb.jpg"
           : null;
-      list.add(GpsTrack(name, url, id, distance, type));
+      list.add(GpsTrack(name, url, null, id, distance, type));
     }
     return list;
   }
