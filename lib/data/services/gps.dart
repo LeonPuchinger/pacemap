@@ -2,7 +2,8 @@ enum TrackType { route, trip }
 
 class GpsTrack {
   final String name;
-  final String? thumbnailUrl, startTime;
+  final String? thumbnailUrl;
+  final DateTime? startTime;
   final int id, distance;
   final TrackType type;
 

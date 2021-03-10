@@ -1,3 +1,4 @@
+import 'package:pacemap/data/services/gps.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -33,5 +34,16 @@ class DatabaseHandler {
         ''');
       },
     );
+  }
+
+  insertTrack(GpsTrack track) async {
+    final trackMap = {
+      columnTrackId: track.id,
+      columnTrackName: track.name,
+      columnTrackDistance: track.distance,
+      columnTrackUrl: track.thumbnailUrl,
+      columnTrackStartTime: track.startTime?.toIso8601String(),
+    };
+    await db.insert(tableTracks, trackMap, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }
