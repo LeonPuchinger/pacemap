@@ -31,6 +31,7 @@ class AddBloc {
     if (_tracks.value != null) {
       _download.add(true);
       final track = _tracks.value![index];
+      await _db.insertTrack(track);
       final gpx = await _client.getGpx(track.id, track.type);
       _download.add(false);
     }

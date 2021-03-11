@@ -19,7 +19,7 @@ class DatabaseHandler {
     return database;
   }
 
-  open() async {
+  Future open() async {
     db = await openDatabase(
       join((await getApplicationDocumentsDirectory()).path, "pacemap.db"),
       version: 1,
@@ -36,7 +36,7 @@ class DatabaseHandler {
     );
   }
 
-  insertTrack(GpsTrack track) async {
+  Future insertTrack(GpsTrack track) async {
     final trackMap = {
       columnTrackId: track.id,
       columnTrackName: track.name,
@@ -67,7 +67,7 @@ class DatabaseHandler {
     }).toList();
   }
 
-  dispose() async {
+  Future dispose() async {
     await db.close();
   }
 }
