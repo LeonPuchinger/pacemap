@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:get_it/get_it.dart';
+import 'package:pacemap/data/services/database.dart';
 import 'package:pacemap/data/services/gps.dart';
 import 'package:pacemap/data/services/rwgps.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AddBloc {
   final _client = RWGPSClient();
+  final _db = GetIt.I<DatabaseHandler>();
 
   final _search = BehaviorSubject<String>();
   final _tracks = BehaviorSubject<List<GpsTrack>>();

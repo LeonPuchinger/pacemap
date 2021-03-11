@@ -4,15 +4,25 @@ import 'package:pacemap/data/services/database.dart';
 import 'package:pacemap/widgets/addtrack.dart';
 import 'package:pacemap/widgets/tracklist.dart';
 
-void main() {
-  GetIt.I.registerLazySingletonAsync<DatabaseHandler>(
-    () => DatabaseHandler.initDatabase(),
-    dispose: (db) => db.dispose(),
-  );
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final db = await DatabaseHandler.initDatabase();
+  GetIt.I.registerSingleton<DatabaseHandler>(db);
   runApp(PaceMapApp());
 }
 
-class PaceMapApp extends StatelessWidget {
+class PaceMapApp extends StatefulWidget {
+  @override
+  _PaceMapAppState createState() => _PaceMapAppState();
+}
+
+class _PaceMapAppState extends State<PaceMapApp> {
+  @override
+  void dispose() {
+    GetIt.I<DatabaseHandler>().dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,18 +32,6 @@ class PaceMapApp extends StatelessWidget {
       routes: {
         "list": (_) => Tracklist(),
         "list/add": (_) => AddTrack(),
-      },
-      builder: (_, route) {
-        return FutureBuilder(
-          future: GetIt.I.allReady(),
-          builder: (_, readySnapshot) {
-            if (readySnapshot.hasData) {
-              return route!;
-            } else {
-              return CircularProgressIndicator();
-            }
-          },
-        );
       },
     );
   }
