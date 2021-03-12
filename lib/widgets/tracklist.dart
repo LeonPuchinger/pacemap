@@ -35,6 +35,7 @@ class _TracklistState extends State<Tracklist> {
                   name: track.name,
                   distance: "${track.distance}",
                   url: track.thumbnailUrl,
+                  onPressed: () => _bloc.selectTrack(index),
                 );
               },
               itemCount: tracksSnapshot.data?.length,
