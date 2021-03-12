@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:get_it/get_it.dart';
 import 'package:pacemap/data/services/database.dart';
+import 'package:pacemap/data/services/filesystem.dart';
 import 'package:pacemap/data/services/gps.dart';
 import 'package:pacemap/data/services/rwgps.dart';
 import 'package:pacemap/data/state/appBloc.dart';
@@ -35,6 +36,7 @@ class AddBloc {
       final track = _tracks.value![index];
       await _db.insertTrack(track);
       final gpx = await _client.getGpx(track.id, track.type);
+      await writeGPX(gpx, track.id);
       _download.add(false);
       _appBloc.setTracksChanged();
     }
