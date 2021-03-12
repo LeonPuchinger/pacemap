@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:latlng/latlng.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlng/latlng.dart' as latlng;
 import 'package:pacemap/data/state/map_bloc.dart';
 
 class PaceMap extends StatefulWidget {
@@ -23,16 +24,15 @@ class _PaceMapState extends State<PaceMap> {
         title: Text("Details"),
       ),
       body: SafeArea(
-        child: StreamBuilder<List<LatLng>>(
+        child: StreamBuilder<List<latlng.LatLng>>(
           stream: _bloc.gpx,
           initialData: [],
           builder: (_, gpxSnapshot) {
-            return ListView.builder(
-              itemBuilder: (_, int index) {
-                final c = gpxSnapshot.data![index];
-                return Text("${c.latitude} ${c.longitude}");
-              },
-              itemCount: gpxSnapshot.data!.length,
+            return GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(50, 10),
+                zoom: 0,
+              ),
             );
           },
         ),
