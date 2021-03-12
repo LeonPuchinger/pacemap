@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlng/latlng.dart' as latlng;
 import 'package:pacemap/data/state/map_bloc.dart';
+import 'package:pacemap/widgets/mapstyles.dart';
 
 class PaceMap extends StatefulWidget {
   @override
@@ -39,10 +40,14 @@ class _PaceMapState extends State<PaceMap> {
                   color: Colors.red,
                 ),
               ]),
+              mapType: MapType.normal,
               initialCameraPosition: CameraPosition(
                 target: LatLng(50, 10),
                 zoom: 0,
               ),
+              onMapCreated: (controller) {
+                controller.setMapStyle(dark);
+              },
             );
           },
         ),
