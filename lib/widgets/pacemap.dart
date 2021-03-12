@@ -29,6 +29,16 @@ class _PaceMapState extends State<PaceMap> {
           initialData: [],
           builder: (_, gpxSnapshot) {
             return GoogleMap(
+              polylines: Set.from([
+                Polyline(
+                  points: gpxSnapshot.data!
+                      .map((c) => LatLng(c.latitude, c.longitude))
+                      .toList(),
+                  width: 4,
+                  polylineId: PolylineId("superUniqueId"),
+                  color: Colors.red,
+                ),
+              ]),
               initialCameraPosition: CameraPosition(
                 target: LatLng(50, 10),
                 zoom: 0,
