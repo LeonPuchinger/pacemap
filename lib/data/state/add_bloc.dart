@@ -4,9 +4,11 @@ import 'package:get_it/get_it.dart';
 import 'package:pacemap/data/services/database.dart';
 import 'package:pacemap/data/services/gps.dart';
 import 'package:pacemap/data/services/rwgps.dart';
+import 'package:pacemap/data/state/appBloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AddBloc {
+  final _appBloc = GetIt.I<AppBloc>();
   final _client = RWGPSClient();
   final _db = GetIt.I<DatabaseHandler>();
 
@@ -34,6 +36,7 @@ class AddBloc {
       await _db.insertTrack(track);
       final gpx = await _client.getGpx(track.id, track.type);
       _download.add(false);
+      _appBloc.setTracksChanged();
     }
   }
 
