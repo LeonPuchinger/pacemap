@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:pacemap/data/services/database.dart';
 import 'package:pacemap/data/state/appBloc.dart';
 import 'package:pacemap/widgets/addtrack.dart';
+import 'package:pacemap/widgets/pacemap.dart';
 import 'package:pacemap/widgets/tracklist.dart';
 
 void main() async {
@@ -35,6 +36,7 @@ class _PaceMapAppState extends State<PaceMapApp> {
       routes: {
         "list": (_) => Tracklist(),
         "list/add": (_) => AddTrack(),
+        "list/map": (_) => PaceMap(),
       },
     );
   }
