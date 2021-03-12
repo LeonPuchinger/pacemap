@@ -29,6 +29,7 @@ dependencies:
   path_provider: ^2.0.0-nullsafety.1
   sqflite: ^2.0.0-nullsafety.3
   get_it: ^6.0.0-nullsafety.2
+  petitparser: ^4.0.0-nullsafety.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
