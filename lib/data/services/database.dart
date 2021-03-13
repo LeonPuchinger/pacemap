@@ -1,4 +1,5 @@
 import 'package:pacemap/data/services/gps.dart';
+import 'package:pacemap/data/services/map.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,6 +10,12 @@ const columnTrackName = "name";
 const columnTrackDistance = "distance";
 const columnTrackUrl = "url";
 const columnTrackStartTime = "start";
+
+const tableAthletes = "athlets";
+const columnAthleteId = "id";
+const columnAthleteTrack = "trackid";
+const columnAthleteName = "name";
+const columnAthletePace = "pace";
 
 class DatabaseHandler {
   late Database db;
@@ -22,7 +29,7 @@ class DatabaseHandler {
   Future open() async {
     db = await openDatabase(
       join((await getApplicationDocumentsDirectory()).path, "pacemap.db"),
-      version: 1,
+      version: 2,
       onCreate: (Database db, int version) async {
         await db.execute('''
         create table $tableTracks (
@@ -31,6 +38,13 @@ class DatabaseHandler {
           $columnTrackDistance integer not null,
           $columnTrackUrl text,
           $columnTrackStartTime text)
+        ''');
+        await db.execute('''
+        create table $tableAthletes (
+          $columnAthleteId integer primary key autoincrement,
+          $columnAthleteTrack integer foreign key references $tableTracks($columnTrackId),
+          $columnAthleteName text not null,
+          $columnAthletePace integer not null)
         ''');
       },
     );
@@ -63,6 +77,36 @@ class DatabaseHandler {
         r[columnTrackId] as int,
         r[columnTrackDistance] as int,
         TrackType.route,
+      );
+    }).toList();
+  }
+
+  Future<int> insertAthlete(Athlete athlete, int trackId) async {
+    final athleteMap = {
+      columnAthleteTrack: trackId,
+      columnAthleteName: athlete.name,
+      columnAthletePace: athlete.pace.inMilliseconds,
+    };
+    if (athlete.id != null) {
+      athleteMap[columnAthleteId] = athlete.id!;
+    }
+    return await db.insert(
+      "$tableAthletes",
+      athleteMap,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Athlete>> getAthletes(int trackId) async {
+    final athletes = await db.query(
+      tableAthletes,
+      where: "$columnAthleteTrack = $trackId",
+    );
+    return athletes.map((r) {
+      return Athlete(
+        r[columnAthleteName] as String,
+        Duration(milliseconds: r[columnAthletePace] as int),
+        r[columnAthleteId] as int,
       );
     }).toList();
   }
