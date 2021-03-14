@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlng/latlng.dart' as latlng;
+import 'package:pacemap/data/services/map.dart';
 import 'package:pacemap/data/state/map_bloc.dart';
 import 'package:pacemap/widgets/mapstyles.dart';
 
@@ -31,6 +32,81 @@ class _PaceMapState extends State<PaceMap> {
   void dispose() {
     _bloc.dispose();
     super.dispose();
+  }
+
+  showAddDialog(context) async {
+    final bloc = AddAthleteBloc();
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          contentPadding: EdgeInsets.fromLTRB(20, 24, 20, 10),
+          title: Text("Add athlete to track"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  leading: Icon(Icons.person),
+                  title: StreamBuilder<String>(
+                    stream: bloc.name,
+                    builder: (_, nameSnapshot) {
+                      return TextField(
+                        onChanged: bloc.inputName,
+                        decoration: InputDecoration(
+                          hintText: "Name",
+                          errorText: nameSnapshot.error?.toString(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  leading: Icon(Icons.person),
+                  title: StreamBuilder<Duration>(
+                    stream: bloc.pace,
+                    builder: (_, paceSnapshot) {
+                      return TextField(
+                        onChanged: bloc.inputPace,
+                        decoration: InputDecoration(
+                          hintText: "Pace",
+                          errorText: paceSnapshot.error?.toString(),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            StreamBuilder<bool>(
+              stream: bloc.validated,
+              builder: (context, validatedSnapshot) {
+                return TextButton(
+                  child: Text("Add"),
+                  onPressed: validatedSnapshot.hasData
+                      ? () {
+                          bloc.submit();
+                          Navigator.of(context).pop();
+                        }
+                      : null,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+    bloc.dispose();
   }
 
   @override
@@ -85,9 +161,29 @@ class _PaceMapState extends State<PaceMap> {
                       ),
                     );
                   }),
-            )
+            ),
+            StreamBuilder<List<Athlete>>(
+              stream: _bloc.athletes,
+              initialData: [],
+              builder: (_, athletesSnapshot) {
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemBuilder: (_, index) {
+                    final athlete = athletesSnapshot.data![index];
+                    return Text(
+                        "${athlete.name},${athlete.pace.toString()},${athlete.id}");
+                  },
+                  itemCount: athletesSnapshot.data!.length,
+                );
+              },
+            ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.person_add),
+        tooltip: "Add athlete to track",
+        onPressed: () => showAddDialog(context),
       ),
     );
   }

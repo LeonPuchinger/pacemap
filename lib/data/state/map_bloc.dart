@@ -5,6 +5,8 @@ import 'package:latlng/latlng.dart';
 import 'package:pacemap/data/services/database.dart';
 import 'package:pacemap/data/services/filesystem.dart';
 import 'package:pacemap/data/services/gps.dart';
+import 'package:pacemap/data/services/map.dart';
+import 'package:pacemap/data/services/validators.dart';
 import 'package:pacemap/data/state/appBloc.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -16,15 +18,27 @@ class MapBloc with TimeValidator {
   final _gpx = BehaviorSubject<List<LatLng>>();
   final _startTime = BehaviorSubject<String>();
   final _initialTime = BehaviorSubject<DateTime>();
+  final _athletes = BehaviorSubject<List<Athlete>>();
 
   Stream<GpsTrack> get track => _track.stream;
   Stream<List<LatLng>> get gpx => _gpx.stream;
   Stream<DateTime> get startTime => _startTime.transform(timeValidator);
   Stream<DateTime> get initialTime => _initialTime.stream;
+  Stream<List<Athlete>> get athletes => _athletes.stream;
 
   late StreamSubscription selectedTrackSubscription;
+  late StreamSubscription athleteAddedSubscription;
 
   Function(String) get setStartTime => _startTime.add;
+
+  updateAthletes() async {
+    late StreamSubscription sub;
+    sub = _track.listen((track) async {
+      final athletes = await _db.getAthletes(track.id);
+      _athletes.add(athletes);
+      sub.cancel();
+    });
+  }
 
   MapBloc() {
     init();
@@ -46,6 +60,12 @@ class MapBloc with TimeValidator {
     track.listen((track) {
       _db.insertTrack(track);
     });
+    athleteAddedSubscription = _appBloc.athleteAdded.listen((athlete) async {
+      final track = _track.value!;
+      await _db.insertAthlete(athlete, track.id);
+      updateAthletes();
+    });
+    updateAthletes();
   }
 
   dispose() {
@@ -53,43 +73,40 @@ class MapBloc with TimeValidator {
     _gpx.close();
     _startTime.close();
     _initialTime.close();
+    _athletes.close();
     selectedTrackSubscription.cancel();
+    athleteAddedSubscription.cancel();
   }
 }
 
-mixin TimeValidator {
-  final timeValidator = StreamTransformer<String, DateTime>.fromHandlers(
-      handleData: (time, sink) {
-    var dateTime = DateTime.tryParse(time);
-    if (dateTime != null) {
-      sink.add(dateTime);
-      return;
-    }
-    final simpleTime = r"([01]\d|2[0-3]):([0-5]\d)";
-    final rSimpleTime = RegExp(simpleTime);
-    if (rSimpleTime.hasMatch(time)) {
-      final match = rSimpleTime.firstMatch(time)!;
-      final hour = int.parse(match.group(1)!);
-      final minute = int.parse(match.group(2)!);
-      int day, month, year;
-      final simpleDateTime =
-          r"(3[01]|[12][0-9]|0?[1-9])\.(1[012]|0?[1-9])\.([2-9][0-9]{3})";
-      final rSimpleDateTime = RegExp(simpleDateTime);
-      if (rSimpleDateTime.hasMatch(time)) {
-        final match = rSimpleDateTime.firstMatch(time)!;
-        day = int.parse(match.group(1)!);
-        month = int.parse(match.group(2)!);
-        year = int.parse(match.group(3)!);
-      } else {
-        final today = DateTime.now();
-        day = today.day;
-        month = today.month;
-        year = today.year;
-      }
-      dateTime = DateTime(year, month, day, hour, minute);
-      sink.add(dateTime);
-      return;
-    }
-    sink.addError("Invalid time format");
-  });
+class AddAthleteBloc with AthleteValidator {
+  final appBloc = GetIt.I<AppBloc>();
+
+  String? latestName;
+  Duration? latestPace;
+
+  final _name = BehaviorSubject<String>();
+  final _pace = BehaviorSubject<String>();
+
+  Stream<String> get name => _name.stream.transform(nameValidator);
+  Stream<Duration> get pace => _pace.stream.transform(paceValidator);
+  Stream<bool> get validated => CombineLatestStream.combine2(
+        name,
+        pace,
+        (String n, Duration p) {
+          latestName = n;
+          latestPace = p;
+          return true;
+        },
+      );
+
+  Function(String) get inputName => _name.sink.add;
+  Function(String) get inputPace => _pace.sink.add;
+
+  submit() => appBloc.addAthlete(Athlete(latestName!, latestPace!, null));
+
+  void dispose() {
+    _name.close();
+    _pace.close();
+  }
 }
