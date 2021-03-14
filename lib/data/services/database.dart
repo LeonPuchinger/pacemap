@@ -11,7 +11,7 @@ const columnTrackDistance = "distance";
 const columnTrackUrl = "url";
 const columnTrackStartTime = "start";
 
-const tableAthletes = "athlets";
+const tableAthletes = "athletes";
 const columnAthleteId = "id";
 const columnAthleteTrack = "trackid";
 const columnAthleteName = "name";
