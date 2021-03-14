@@ -42,9 +42,10 @@ class DatabaseHandler {
         await db.execute('''
         create table $tableAthletes (
           $columnAthleteId integer primary key autoincrement,
-          $columnAthleteTrack integer foreign key references $tableTracks($columnTrackId),
+          $columnAthleteTrack integer not null,
           $columnAthleteName text not null,
-          $columnAthletePace integer not null)
+          $columnAthletePace integer not null,
+          foreign key($columnAthleteTrack) references $tableTracks($columnTrackId))
         ''');
       },
     );
