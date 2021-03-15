@@ -170,8 +170,24 @@ class _PaceMapState extends State<PaceMap> {
                   shrinkWrap: true,
                   itemBuilder: (_, index) {
                     final athlete = athletesSnapshot.data![index];
-                    return Text(
-                        "${athlete.name},${athlete.pace.toString()},${athlete.id}");
+                    return ListTile(
+                      leading: Icon(Icons.directions_run),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(athlete.name),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {},
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.close),
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   itemCount: athletesSnapshot.data!.length,
                 );
