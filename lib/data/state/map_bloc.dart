@@ -31,6 +31,11 @@ class MapBloc with TimeValidator {
 
   Function(String) get setStartTime => _startTime.add;
 
+  editAthlete(int index) {
+    final athlete = _athletes.value![index];
+    _appBloc.editAthlete(athlete);
+  }
+
   deleteAthlete(int index) async {
     final athlete = _athletes.value![index];
     await _db.removeAthlete(athlete.id!);
@@ -86,13 +91,15 @@ class MapBloc with TimeValidator {
 }
 
 class AddAthleteBloc with AthleteValidator {
-  final appBloc = GetIt.I<AppBloc>();
+  final _appBloc = GetIt.I<AppBloc>();
 
   String? latestName;
   Duration? latestPace;
+  int? id;
 
   final _name = BehaviorSubject<String>();
   final _pace = BehaviorSubject<String>();
+  final _initial = BehaviorSubject<Map<String, String>>();
 
   Stream<String> get name => _name.stream.transform(nameValidator);
   Stream<Duration> get pace => _pace.stream.transform(paceValidator);
@@ -105,14 +112,34 @@ class AddAthleteBloc with AthleteValidator {
           return true;
         },
       );
+  Stream<Map<String, String>> get initial => _initial.stream;
+
+  late StreamSubscription _athleteEditSubscription;
 
   Function(String) get inputName => _name.sink.add;
   Function(String) get inputPace => _pace.sink.add;
 
-  submit() => appBloc.addAthlete(Athlete(latestName!, latestPace!, null));
+  AddAthleteBloc() {
+    init();
+  }
 
-  void dispose() {
+  submit() => _appBloc.addAthlete(Athlete(latestName!, latestPace!, id));
+
+  init() {
+    _athleteEditSubscription = _appBloc.athleteEdit.listen((athlete) {
+      _initial.add({
+        "name": athlete.name,
+        "pace":
+            "${athlete.pace.inMinutes}:${athlete.pace.inSeconds.remainder(60)}",
+      });
+      id = athlete.id;
+    });
+  }
+
+  dispose() {
     _name.close();
     _pace.close();
+    _initial.close();
+    _athleteEditSubscription.cancel();
   }
 }

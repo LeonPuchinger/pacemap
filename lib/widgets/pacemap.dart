@@ -36,6 +36,16 @@ class _PaceMapState extends State<PaceMap> {
 
   showAddDialog(context) async {
     final bloc = AddAthleteBloc();
+    final _nameController = TextEditingController();
+    final _paceController = TextEditingController();
+    bloc.initial.listen((initial) {
+      final name = initial["name"] ?? "";
+      final pace = initial["pace"] ?? "";
+      _nameController.text = name;
+      _paceController.text = pace;
+      bloc.inputName(name);
+      bloc.inputPace(pace);
+    });
     await showDialog(
       context: context,
       builder: (context) {
@@ -55,6 +65,7 @@ class _PaceMapState extends State<PaceMap> {
                     builder: (_, nameSnapshot) {
                       return TextField(
                         onChanged: bloc.inputName,
+                        controller: _nameController,
                         decoration: InputDecoration(
                           hintText: "Name",
                           errorText: nameSnapshot.error?.toString(),
@@ -72,6 +83,7 @@ class _PaceMapState extends State<PaceMap> {
                     builder: (_, paceSnapshot) {
                       return TextField(
                         onChanged: bloc.inputPace,
+                        controller: _paceController,
                         decoration: InputDecoration(
                           hintText: "Pace",
                           errorText: paceSnapshot.error?.toString(),
@@ -179,7 +191,10 @@ class _PaceMapState extends State<PaceMap> {
                           ),
                           IconButton(
                             icon: Icon(Icons.edit),
-                            onPressed: () {},
+                            onPressed: () {
+                              _bloc.editAthlete(index);
+                              showAddDialog(context);
+                            },
                           ),
                           IconButton(
                             icon: Icon(Icons.close),
