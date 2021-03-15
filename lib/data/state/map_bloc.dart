@@ -31,6 +31,12 @@ class MapBloc with TimeValidator {
 
   Function(String) get setStartTime => _startTime.add;
 
+  deleteAthlete(int index) async {
+    final athlete = _athletes.value![index];
+    await _db.removeAthlete(athlete.id!);
+    await updateAthletes();
+  }
+
   updateAthletes() async {
     late StreamSubscription sub;
     sub = _track.listen((track) async {

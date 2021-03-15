@@ -183,7 +183,7 @@ class _PaceMapState extends State<PaceMap> {
                           ),
                           IconButton(
                             icon: Icon(Icons.close),
-                            onPressed: () {},
+                            onPressed: () => _bloc.deleteAthlete(index),
                           ),
                         ],
                       ),

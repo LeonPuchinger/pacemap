@@ -98,10 +98,19 @@ class DatabaseHandler {
     );
   }
 
+  Future removeAthlete(int athleteId) async {
+    await db.delete(
+      "$tableAthletes",
+      where: "$columnAthleteId = ?",
+      whereArgs: ["$athleteId"],
+    );
+  }
+
   Future<List<Athlete>> getAthletes(int trackId) async {
     final athletes = await db.query(
       tableAthletes,
-      where: "$columnAthleteTrack = $trackId",
+      where: "$columnAthleteTrack = ?",
+      whereArgs: ["$trackId"],
     );
     return athletes.map((r) {
       return Athlete(
