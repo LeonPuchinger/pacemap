@@ -1,5 +1,6 @@
 import 'package:pacemap/data/services/gps.dart';
 import 'package:pacemap/data/services/map.dart';
+import 'package:pacemap/util/oblivious_subject.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AppBloc {
@@ -11,10 +12,7 @@ class AppBloc {
   Stream<void> get tracksChanged => _tracksChanged.stream;
   Stream<GpsTrack> get selectedTrack => _selectedTrack.stream;
   Stream<Athlete> get athleteAdded => _athleteAdded.stream;
-  Stream<Athlete> get athleteEdit => _athleteEdit //oblivious subject workaround
-      .where((athlete) => athlete != null)
-      .doOnData((_) => _athleteEdit.add(null))
-      .cast<Athlete>();
+  Stream<Athlete> get athleteEdit => _athleteEdit.obliviousStream;
 
   Function() get setTracksChanged => () => _tracksChanged.add(null);
   Function(GpsTrack) get selectTrack => _selectedTrack.add;
