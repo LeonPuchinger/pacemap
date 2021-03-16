@@ -123,13 +123,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0"
-  latlng:
-    dependency: "direct main"
+  intl:
+    dependency: transitive
     description:
-      name: latlng
+      name: intl
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0"
+    version: "0.17.0"
+  latlong2:
+    dependency: "direct main"
+    description:
+      name: latlong2
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.8.0"
   matcher:
     dependency: transitive
     description:

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:latlng/latlng.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:pacemap/data/services/gps.dart';
 
 class RWGPSClient {

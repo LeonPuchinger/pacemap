@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:latlng/latlng.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:pacemap/data/services/parser.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';

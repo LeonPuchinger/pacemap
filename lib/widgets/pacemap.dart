@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:latlng/latlng.dart' as latlng;
+import 'package:latlong2/latlong.dart' as latlong;
 import 'package:pacemap/data/services/map.dart';
 import 'package:pacemap/data/state/map_bloc.dart';
 import 'package:pacemap/widgets/mapstyles.dart';
@@ -132,7 +132,7 @@ class _PaceMapState extends State<PaceMap> {
           children: [
             Container(
               height: MediaQuery.of(context).size.height / 3,
-              child: StreamBuilder<List<latlng.LatLng>>(
+              child: StreamBuilder<List<latlong.LatLng>>(
                 stream: _bloc.gpx,
                 initialData: [],
                 builder: (_, gpxSnapshot) {

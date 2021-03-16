@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:get_it/get_it.dart';
-import 'package:latlng/latlng.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:pacemap/data/services/database.dart';
 import 'package:pacemap/data/services/filesystem.dart';
 import 'package:pacemap/data/services/gps.dart';
