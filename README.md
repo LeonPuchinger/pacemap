@@ -6,6 +6,8 @@ Rewrite of a project I did 2 years ago.
 
 pacemap lets you live-track athletes on a map using gpx-data of the track.
 
+![showcase image](showcase.png "PaceMap on iOS and Android")
+
 ## Building
 
 1. Add Google-Maps API Key (required):
