@@ -5,6 +5,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:pacemap/data/services/map.dart';
 import 'package:pacemap/data/state/map_bloc.dart';
+import 'package:pacemap/util/dual_streambuilder.dart';
+import 'package:pacemap/util/formatter.dart';
 import 'package:pacemap/widgets/mapstyles.dart';
 
 class PaceMap extends StatefulWidget {
@@ -174,34 +176,24 @@ class _PaceMapState extends State<PaceMap> {
                     );
                   }),
             ),
-            StreamBuilder<List<Athlete>>(
-              stream: _bloc.athletes,
-              initialData: [],
-              builder: (_, athletesSnapshot) {
+            DualStreamBuilder<List<Athlete>, List<Map<String, dynamic>>>(
+              streamA: _bloc.athletes,
+              streamB: _bloc.trackData,
+              initialDataA: [],
+              builder: (_, athletesSnapshot, trackDataSnapshot) {
                 return ListView.builder(
                   shrinkWrap: true,
                   itemBuilder: (_, index) {
                     final athlete = athletesSnapshot.data![index];
-                    return ListTile(
-                      leading: Icon(Icons.directions_run),
-                      title: Row(
-                        children: [
-                          Expanded(
-                            child: Text(athlete.name),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () {
-                              _bloc.editAthlete(index);
-                              showAddDialog(context);
-                            },
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.close),
-                            onPressed: () => _bloc.deleteAthlete(index),
-                          ),
-                        ],
-                      ),
+                    final trackData = trackDataSnapshot.data?[index];
+                    return AthleteTrack(
+                      athlete: athlete,
+                      trackData: trackData,
+                      onEditPressed: () {
+                        _bloc.editAthlete(index);
+                        showAddDialog(context);
+                      },
+                      onRemovePressed: () => _bloc.deleteAthlete(index),
                     );
                   },
                   itemCount: athletesSnapshot.data!.length,
@@ -215,6 +207,71 @@ class _PaceMapState extends State<PaceMap> {
         child: Icon(Icons.person_add),
         tooltip: "Add athlete to track",
         onPressed: () => showAddDialog(context),
+      ),
+    );
+  }
+}
+
+class AthleteTrack extends StatelessWidget {
+  final Athlete athlete;
+  final Map<String, dynamic>? trackData;
+  final Function() onEditPressed, onRemovePressed;
+
+  AthleteTrack({
+    required this.athlete,
+    required this.trackData,
+    required this.onEditPressed,
+    required this.onRemovePressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: Icon(Icons.directions_run),
+            contentPadding: EdgeInsets.zero,
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(athlete.name),
+                ),
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: onEditPressed,
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: onRemovePressed,
+                ),
+              ],
+            ),
+          ),
+          Text(
+            "pace: ${formatDuration(athlete.pace)}",
+          ),
+          Text(
+            "athlete currently at: ${trackData?["distStartAthlete"] ?? "--"} km",
+          ),
+          Text(
+            "athlete's distance to finish: ${trackData?["distAthleteFinish"] ?? "--"} km",
+          ),
+          Text(
+            "spectator currently at: ${trackData?["distStartSpectator"] ?? "--"} km",
+          ),
+          Text(
+            "distance between athlete and spectator: ${trackData?["distAthleteSpectator"] ?? "--"} km",
+          ),
+          Text(
+            "athlete's time to finish: ${trackData?["timeAthleteFinish"] != null ? formatDuration(trackData!["timeAthleteFinish"]) : "--"} h",
+          ),
+          Text(
+            "athlete's time to spectator: ${trackData?["timeAthleteSpectator"] != null ? formatDuration(trackData!["timeAthleteSpectator"]) : "--"} h",
+          ),
+        ],
       ),
     );
   }

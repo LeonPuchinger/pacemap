@@ -8,11 +8,13 @@ import 'package:pacemap/data/services/gps.dart';
 import 'package:pacemap/data/services/map.dart';
 import 'package:pacemap/data/services/validators.dart';
 import 'package:pacemap/data/state/appBloc.dart';
+import 'package:pacemap/util/formatter.dart';
 import 'package:rxdart/rxdart.dart';
 
 class MapBloc with TimeValidator {
   final _appBloc = GetIt.I<AppBloc>();
   final _db = GetIt.I<DatabaseHandler>();
+  late Tracker _tracker;
 
   final _track = BehaviorSubject<GpsTrack>();
   final _gpx = BehaviorSubject<List<LatLng>>();
@@ -25,6 +27,22 @@ class MapBloc with TimeValidator {
   Stream<DateTime> get startTime => _startTime.transform(timeValidator);
   Stream<DateTime> get initialTime => _initialTime.stream;
   Stream<List<Athlete>> get athletes => _athletes.stream;
+  Stream<List<Map<String, dynamic>>> get trackData => CombineLatestStream
+          .combine2<List<Athlete>, DateTime, List<Map<String, dynamic>>>(
+        athletes,
+        startTime.handleError((_) {}),
+        (
+          athletes,
+          startTime,
+        ) {
+          final list = <Map<String, dynamic>>[];
+          final time = DateTime.now().difference(startTime);
+          for (final athlete in athletes) {
+            list.add(_tracker.trackAthlete(athlete, LatLng(50, 50), time));
+          }
+          return list;
+        },
+      );
 
   late StreamSubscription selectedTrackSubscription;
   late StreamSubscription athleteAddedSubscription;
@@ -60,7 +78,9 @@ class MapBloc with TimeValidator {
       _track.add(track);
       final gpx = await readGpx(track.id);
       _gpx.add(gpx);
+      _tracker = Tracker(gpx);
       if (track.startTime != null) {
+        _startTime.add(track.startTime.toString());
         _initialTime.add(track.startTime!);
       }
     });
@@ -129,8 +149,7 @@ class AddAthleteBloc with AthleteValidator {
     _athleteEditSubscription = _appBloc.athleteEdit.listen((athlete) {
       _initial.add({
         "name": athlete.name,
-        "pace":
-            "${athlete.pace.inMinutes}:${athlete.pace.inSeconds.remainder(60)}",
+        "pace": formatDuration(athlete.pace),
       });
       id = athlete.id;
     });
