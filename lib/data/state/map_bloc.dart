@@ -21,6 +21,7 @@ class MapBloc with TimeValidator {
   final _startTime = BehaviorSubject<String>();
   final _initialTime = BehaviorSubject<DateTime>();
   final _athletes = BehaviorSubject<List<Athlete>>();
+  final _markers = BehaviorSubject<Map<String, LatLng>>();
 
   Stream<GpsTrack> get track => _track.stream;
   Stream<List<LatLng>> get gpx => _gpx.stream;
@@ -37,12 +38,19 @@ class MapBloc with TimeValidator {
         ) {
           final list = <Map<String, dynamic>>[];
           final time = DateTime.now().difference(startTime);
+          final markers = <String, LatLng>{};
           for (final athlete in athletes) {
-            list.add(_tracker.trackAthlete(athlete, LatLng(50, 50), time));
+            final trackData =
+                _tracker.trackAthlete(athlete, LatLng(50, 50), time);
+            list.add(trackData);
+            markers["Spectator"] = trackData["posSpectator"];
+            markers[athlete.name] = trackData["posAthlete"];
           }
+          _markers.add(markers);
           return list;
         },
       );
+  Stream<Map<String, LatLng>> get markers => _markers.stream;
 
   late StreamSubscription selectedTrackSubscription;
   late StreamSubscription athleteAddedSubscription;
@@ -105,6 +113,7 @@ class MapBloc with TimeValidator {
     _startTime.close();
     _initialTime.close();
     _athletes.close();
+    _markers.close();
     selectedTrackSubscription.cancel();
     athleteAddedSubscription.cancel();
   }

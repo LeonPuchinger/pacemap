@@ -134,10 +134,13 @@ class _PaceMapState extends State<PaceMap> {
           children: [
             Container(
               height: MediaQuery.of(context).size.height / 3,
-              child: StreamBuilder<List<latlong.LatLng>>(
-                stream: _bloc.gpx,
-                initialData: [],
-                builder: (_, gpxSnapshot) {
+              child: DualStreamBuilder<List<latlong.LatLng>,
+                  Map<String, latlong.LatLng>>(
+                streamA: _bloc.gpx,
+                streamB: _bloc.markers,
+                initialDataA: [],
+                initialDataB: {},
+                builder: (_, gpxSnapshot, markerSnapshot) {
                   return GoogleMap(
                     polylines: Set.from([
                       Polyline(
@@ -157,6 +160,22 @@ class _PaceMapState extends State<PaceMap> {
                     onMapCreated: (controller) {
                       controller.setMapStyle(dark);
                     },
+                    markers: () {
+                      final markers = markerSnapshot.data!;
+                      int id = 0;
+                      return Set<Marker>.from(markers.entries.map((entry) {
+                        final marker = Marker(
+                          markerId: MarkerId("$id"),
+                          position: LatLng(
+                            entry.value.latitude,
+                            entry.value.longitude,
+                          ),
+                          infoWindow: InfoWindow(title: entry.key),
+                        );
+                        id++;
+                        return marker;
+                      }));
+                    }(),
                   );
                 },
               ),
