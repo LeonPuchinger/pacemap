@@ -17,17 +17,29 @@ class PaceMap extends StatefulWidget {
 class _PaceMapState extends State<PaceMap> {
   final _bloc = MapBloc();
   final _timeController = TextEditingController();
+  late GoogleMapController _mapsController;
 
   @override
   void initState() {
     super.initState();
-    late StreamSubscription sub;
-    sub = _bloc.initialTime.listen(
+    late StreamSubscription timeSub;
+    timeSub = _bloc.initialTime.listen(
       (time) {
         _timeController.text = time.toString();
-        sub.cancel();
+        timeSub.cancel();
       },
     );
+    late StreamSubscription gpxSub;
+    gpxSub = _bloc.gpx.listen((gpx) {
+      _mapsController.moveCamera(CameraUpdate.newLatLngZoom(
+        LatLng(
+          gpx[0].latitude,
+          gpx[0].longitude,
+        ),
+        11,
+      ));
+      gpxSub.cancel();
+    });
   }
 
   @override
@@ -158,6 +170,7 @@ class _PaceMapState extends State<PaceMap> {
                       zoom: 0,
                     ),
                     onMapCreated: (controller) {
+                      _mapsController = controller;
                       controller.setMapStyle(dark);
                     },
                     markers: () {
